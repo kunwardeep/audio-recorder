@@ -4,7 +4,7 @@ import Home from "./components/Home";
 import Settings from "./components/Settings";
 import Customers from "./components/Customers";
 
-function App() {
+const App = () => {
   return (
     <div>
       <ThemeProvider>
@@ -14,11 +14,10 @@ function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="customers" element={<Customers />} />
           </Routes>
-          <Home />
         </BrowserRouter>
       </ThemeProvider>
     </div>
   );
-}
+};
 
 export default App;

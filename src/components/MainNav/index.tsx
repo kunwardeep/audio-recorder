@@ -4,9 +4,8 @@ import { Toggle, Field } from "@zendeskgarden/react-forms";
 import { ReactComponent as HomeIcon } from "@zendeskgarden/svg-icons/src/26/home-fill.svg";
 import { ReactComponent as CustomersIcon } from "@zendeskgarden/svg-icons/src/26/tray-user-group.svg";
 import { ReactComponent as SettingsIcon } from "@zendeskgarden/svg-icons/src/26/settings-fill.svg";
-import { ReactComponent as ZendeskIcon } from "@zendeskgarden/svg-icons/src/26/zendesk.svg";
-import { ReactComponent as CompanyLogo } from "../../icons/company_logo.svg";
-import { Navigate } from "react-router-dom";
+import { ReactComponent as CompanyLogo } from "../../assets/icons/company_logo.svg";
+import { ReactComponent as HeidiLogo } from "../../assets/icons/heidi-logo-1.svg";
 
 import { PALETTE } from "@zendeskgarden/react-theming";
 import {
@@ -44,7 +43,7 @@ const MainNav = ({ children }: { children: ReactNode }) => {
   }, [location]);
 
   return (
-    <Chrome isFluid hue={PALETTE.green[900]}>
+    <Chrome isFluid hue={PALETTE.green[700]}>
       <SkipNav targetId="example-navigation-main-content">
         Skip to main content
       </SkipNav>
@@ -99,7 +98,7 @@ const MainNav = ({ children }: { children: ReactNode }) => {
 
         <Nav.Item hasBrandmark title="Zendesk">
           <Nav.ItemIcon>
-            <ZendeskIcon />
+            <HeidiLogo />
           </Nav.ItemIcon>
           <Nav.ItemText>Zendesk</Nav.ItemText>
         </Nav.Item>
@@ -109,18 +108,7 @@ const MainNav = ({ children }: { children: ReactNode }) => {
         <Content id="example-navigation-main-content">
           <Main style={{ padding: 28 }}>
             <Grid.Row>
-              <Grid.Col>
-                {children}
-                {/* <Field>
-                  <Toggle
-                    onChange={() => {
-                      setExpanded(!expanded);
-                    }}
-                  >
-                    <Field.Label>Show expanded</Field.Label>
-                  </Toggle>
-                </Field> */}
-              </Grid.Col>
+              <Grid.Col>{children}</Grid.Col>
             </Grid.Row>
           </Main>
         </Content>
