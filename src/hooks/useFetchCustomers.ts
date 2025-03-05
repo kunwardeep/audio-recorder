@@ -28,7 +28,7 @@ const useFetchCustomers = () => {
     }
   }, []);
 
-  return [loading, error, data];
+  return { loading, error, data };
 };
 
 export default useFetchCustomers;

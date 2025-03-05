@@ -4,7 +4,7 @@ import MainNav from "../MainNav";
 import Recorder from "../Recorder";
 
 const Home = () => {
-  const [loading, error, data] = useFetchCustomers();
+  const { loading, error, data } = useFetchCustomers();
   console.log("hooks", loading, error, data);
 
   return (
