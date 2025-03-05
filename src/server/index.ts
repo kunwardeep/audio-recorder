@@ -6,6 +6,6 @@ export const getCustomers = (): Promise<Array<ICustomersData>> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(CUSTOMERS);
-    }, 2000);
+    }, 500);
   });
 };

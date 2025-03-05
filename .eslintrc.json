@@ -2,17 +2,7 @@
   "extends": ["react-app", "plugin:jsx-a11y/recommended", "react-app/jest"],
   "plugins": ["jsx-a11y", "react-hooks", "@arthurgeron/react-usememo"],
   "rules": {
-    "@arthurgeron/react-usememo/require-usememo": [
-      0,
-      {
-        "strict": true,
-        "checkHookReturnObject": true,
-        "fix": { "addImports": true },
-        "checkHookCalls": true,
-        "ignoredHookCallsNames": { "useStateManagement": false },
-        "ignoredPropNames": ["style"]
-      }
-    ],
+    "@arthurgeron/react-usememo/require-usememo": [2],
     "@arthurgeron/react-usememo/require-memo": [2]
   }
 }

@@ -1,12 +1,10 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Grid } from "@zendeskgarden/react-grid";
-import { Toggle, Field } from "@zendeskgarden/react-forms";
 import { ReactComponent as HomeIcon } from "@zendeskgarden/svg-icons/src/26/home-fill.svg";
 import { ReactComponent as CustomersIcon } from "@zendeskgarden/svg-icons/src/26/tray-user-group.svg";
 import { ReactComponent as SettingsIcon } from "@zendeskgarden/svg-icons/src/26/settings-fill.svg";
 import { ReactComponent as CompanyLogo } from "../../assets/icons/company_logo.svg";
 import { ReactComponent as HeidiLogo } from "../../assets/icons/heidi-logo-1.svg";
-
 import { PALETTE } from "@zendeskgarden/react-theming";
 import {
   Body,
@@ -19,6 +17,7 @@ import {
 } from "@zendeskgarden/react-chrome";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import React from "react";
 
 const HOME_PATH = "/";
 const SETTING_PATH = "/settings";
@@ -26,9 +25,9 @@ const CUSTOMERS_PATH = "/customers";
 
 type NavType = typeof HOME_PATH | typeof SETTING_PATH | typeof CUSTOMERS_PATH;
 
-const MainNav = ({ children }: { children: ReactNode }) => {
+const MainNav = React.memo(({ children }: { children: ReactNode }) => {
   const [nav, setNav] = useState<NavType>();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,11 +42,13 @@ const MainNav = ({ children }: { children: ReactNode }) => {
   }, [location]);
 
   return (
+    // eslint-disable-next-line @arthurgeron/react-usememo/require-usememo
     <Chrome isFluid hue={PALETTE.green[700]}>
       <SkipNav targetId="example-navigation-main-content">
         Skip to main content
       </SkipNav>
       <Nav
+        // eslint-disable-next-line @arthurgeron/react-usememo/require-usememo
         onChange={() => {
           setExpanded(!expanded);
         }}
@@ -115,6 +116,6 @@ const MainNav = ({ children }: { children: ReactNode }) => {
       </Body>
     </Chrome>
   );
-};
+});
 
 export default MainNav;

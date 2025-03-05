@@ -10,6 +10,7 @@ const RecordingTimeDisplay = styled.span`
 `;
 
 // TODO: Pause time not implemented
+// Also this should be a dumb component that just displays the time. Move this logic outside
 const RecordingTime = React.memo(
   ({
     startTimer,

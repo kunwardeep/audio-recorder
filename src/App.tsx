@@ -1,10 +1,12 @@
+/* eslint-disable @arthurgeron/react-usememo/require-usememo */
 import { ThemeProvider } from "@zendeskgarden/react-theming";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import Settings from "./components/Settings";
 import Customers from "./components/Customers";
+import React from "react";
 
-const App = () => {
+const App = React.memo(() => {
   return (
     <div>
       <ThemeProvider>
@@ -18,6 +20,6 @@ const App = () => {
       </ThemeProvider>
     </div>
   );
-};
+});
 
 export default App;
