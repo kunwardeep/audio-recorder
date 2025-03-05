@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 
 interface IUseRecorder {
   recordingHandler: (data: Blob) => void;
@@ -7,13 +7,25 @@ interface IUseRecorder {
   };
 }
 
-// TODO: Check how will this work across multiple browsers and multiple tabs
-// TODO: Handle if the permissions are removed
 const useRecorder = ({ recordingHandler, settings }: IUseRecorder) => {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [streamAvailable, setStreamAvailable] = useState(false);
+
+  const handleOnStop = () => {
+    console.log("useRecorder - stopped");
+    setStreamAvailable(false);
+  };
+
+  const handleOnPause = () => console.log("useRecorder - paused");
+  const handleOnStart = () => {
+    console.log("useRecorder - started");
+    setStreamAvailable(true);
+  };
+  const handleOnResume = () => console.log("useRecorder - resumed");
+  const handleOnError = (event: Event) =>
+    console.error("useRecorder - error", event);
 
   const handleDataAvailable = useCallback(
     (event: BlobEvent) => {
@@ -24,89 +36,58 @@ const useRecorder = ({ recordingHandler, settings }: IUseRecorder) => {
     [recordingHandler]
   );
 
-  const captureAudio = useCallback(() => {
-    const capture = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        mediaStreamRef.current = stream;
+  const captureAudio = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
 
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start(settings.recordingTimeSlice);
-        mediaRecorderRef.current = mediaRecorder;
-        mediaRecorderRef.current.ondataavailable = handleDataAvailable;
-        mediaRecorderRef.current.onstop = handleOnStop;
-        mediaRecorderRef.current.onpause = handleOnPause;
-        mediaRecorderRef.current.onstart = handleOnStart;
-        mediaRecorderRef.current.onresume = handleOnResume;
-        mediaRecorderRef.current.onerror = handleOnError;
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          // Errored while getting permission NotAllowedError: Permission denied
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = handleDataAvailable;
+      mediaRecorder.onstop = handleOnStop;
+      mediaRecorder.onpause = handleOnPause;
+      mediaRecorder.onstart = handleOnStart;
+      mediaRecorder.onresume = handleOnResume;
+      mediaRecorder.onerror = handleOnError;
+      mediaRecorder.start(settings.recordingTimeSlice);
 
-          console.log("Errored while getting permission", err);
-          setError(err);
-        } else {
-          // TODO Do better validation and understand the types of errors
-          console.log("Unsure of the error. Needs more investigation", err);
-        }
+      mediaRecorderRef.current = mediaRecorder;
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Errored while getting permission", err);
+        setError(err);
+      } else {
+        console.error("Unknown error occurred", err);
       }
-    };
-    capture();
+    }
   }, [handleDataAvailable, settings.recordingTimeSlice]);
-
-  const handleOnStop = () => {
-    console.log("useRecorder- stopped");
-    setStreamAvailable(false);
-  };
-
-  const handleOnPause = () => {
-    console.log("useRecorder- paused");
-  };
-
-  const handleOnStart = () => {
-    console.log("useRecorder- start");
-    setStreamAvailable(true);
-  };
-
-  const handleOnResume = () => {
-    console.log("useRecorder- resume");
-  };
-
-  const handleOnError = () => {
-    console.log("useRecorder- error");
-  };
 
   const startRecording = useCallback(() => {
     captureAudio();
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current?.start();
-    }
   }, [captureAudio]);
 
   const stopRecording = useCallback(() => {
-    if (mediaStreamRef.current) {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
       mediaRecorderRef.current = null;
-      mediaStreamRef.current.getAudioTracks().forEach((track) => {
-        if (track.readyState === "live") {
-          track.stop();
-        }
-      });
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
     }
   }, []);
 
   const pauseRecording = useCallback(() => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.pause();
-    }
+    mediaRecorderRef.current?.pause();
   }, []);
 
   const resumeRecording = useCallback(() => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.resume();
-    }
+    mediaRecorderRef.current?.resume();
   }, []);
+
+  useEffect(() => {
+    // This should cleanup on unmount
+    return () => stopRecording();
+  }, [stopRecording]);
 
   return {
     streamAvailable,
