@@ -5,6 +5,7 @@ import StartRecordingButton from "./StartRecordingButton";
 import PauseRecordingButton from "./PauseRecordingButton";
 import useRecorder from "../../hooks/useRecorder";
 import React from "react";
+import { RECORDING_STATE_LABEL_TESTID } from "./dataTestIds";
 
 const RecorderBoundary = styled.div`
   display: flex;
@@ -20,27 +21,36 @@ const RecorderBoundary = styled.div`
   border-color: #ddd9d9;
 `;
 
-const CurrentState = styled.span`
+const CurrentStateLabel = styled.span`
   padding: 10px;
   border-radius: 50px;
   background-color: #ffffff;
 `;
 
-const defaultLabel = "Recording not started";
-const pausedLabel = "Recording paused";
-const stoppedLabel = "Recording stopped";
-const startedLabel = "Recording started";
+const LABELS = {
+  DEFAULT: "Recording not started",
+  PAUSED: "Recording paused",
+  RESUME: "Recording resumed",
+  STOPPED: "Recording stopped",
+  STARTED: "Recording started",
+  ERROR: "Unable to record",
+};
+
+const PAUSE_BUTTON = "PAUSE_BUTTON_CLICKED";
+const RECORD_BUTTON = "RECORD_BUTTON_CLICKED";
 
 const Recorder = React.memo(
   ({ saveAudioBlob }: { saveAudioBlob: (blob: Blob) => void }) => {
     const [beginRecording, setBeginRecording] = useState(false);
-    const [isPaused, setIsPaused] = useState(false);
-    const [label, setLabel] = useState(defaultLabel);
+    const [isRecording, setIsRecording] = useState<boolean | undefined>(
+      undefined
+    );
+    const [isPaused, setIsPaused] = useState<boolean | undefined>(undefined);
+    const [label, setLabel] = useState(LABELS.DEFAULT);
     const audioChunksRef = useRef<Array<Blob>>([]);
     // const transcribeAudioChunks = useCallback((data: Blob) => {
     //   console.log("Lets Transcribe");
     // }, []);
-
     const recordingHandler = useCallback((data: Blob) => {
       audioChunksRef.current.push(data);
       console.log("handle recording");
@@ -60,6 +70,18 @@ const Recorder = React.memo(
     });
 
     useEffect(() => {
+      error && setLabel(LABELS.ERROR);
+    }, [error]);
+
+    useEffect(() => {
+      if (beginRecording && streamAvailable) {
+        setIsRecording(true);
+      } else {
+        setIsRecording(false);
+      }
+    }, [beginRecording, streamAvailable]);
+
+    useEffect(() => {
       if (!streamAvailable && audioChunksRef.current.length > 0) {
         const audioBlob = new Blob(audioChunksRef.current, {
           type: "audio/wav",
@@ -69,55 +91,57 @@ const Recorder = React.memo(
       }
     }, [saveAudioBlob, streamAvailable]);
 
-    const handleRecordingClick = useCallback(() => {
-      // TODO: To many conditionals. Simplify this
-      // TODO: Handle labels - currently broken
-      setIsPaused(false);
-      setBeginRecording(!beginRecording);
+    const updateLabel = useCallback(
+      (buttonClicked: typeof PAUSE_BUTTON | typeof RECORD_BUTTON) => {
+        switch (buttonClicked) {
+          case RECORD_BUTTON:
+            setLabel(isRecording ? LABELS.STOPPED : LABELS.STARTED);
+            break;
+          case PAUSE_BUTTON:
+            if (isRecording) {
+              setLabel(isPaused ? LABELS.RESUME : LABELS.PAUSED);
+            }
+            break;
+          default:
+            break;
+        }
+      },
+      [isPaused, isRecording]
+    );
 
-      if (!beginRecording) {
-        startRecording();
-      } else {
+    const handleRecordingClick = useCallback(() => {
+      if (isRecording) {
         stopRecording();
+        setBeginRecording(false);
+        setIsPaused(undefined);
+      } else {
+        startRecording();
+        setBeginRecording(true);
       }
-      if (streamAvailable) {
-        if (label === defaultLabel || label === stoppedLabel) {
-          setLabel(startedLabel);
-        }
-        if (label === startedLabel || label === pausedLabel) {
-          setLabel(stoppedLabel);
-        }
-      }
-    }, [beginRecording, label, stopRecording, startRecording, streamAvailable]);
+      updateLabel(RECORD_BUTTON);
+    }, [isRecording, stopRecording, startRecording, updateLabel]);
 
     const handlePauseClick = useCallback(() => {
-      // TODO: To many conditionals. Simplify this
-      if (label === startedLabel) {
-        setLabel(pausedLabel);
-      }
-      if (label === pausedLabel) {
-        setLabel(startedLabel);
-      }
       setIsPaused(!isPaused);
-      if (isPaused) {
-        resumeRecording();
-      } else {
-        pauseRecording();
-      }
-    }, [isPaused, label, pauseRecording, resumeRecording]);
+      isPaused ? resumeRecording() : pauseRecording();
+      updateLabel(PAUSE_BUTTON);
+    }, [isPaused, pauseRecording, resumeRecording, updateLabel]);
 
     return (
       <RecorderBoundary>
         <RecordingTime
-          pauseTimer={isPaused}
+          //fix this timer
+          pauseTimer={isPaused ?? true}
           startTimer={beginRecording && streamAvailable}
         />
-        <CurrentState>{label}</CurrentState>
+        <CurrentStateLabel data-testid={RECORDING_STATE_LABEL_TESTID}>
+          {label}
+        </CurrentStateLabel>
         <StartRecordingButton
           handleRecordingClick={handleRecordingClick}
-          isRecording={beginRecording && streamAvailable}
+          isRecording={isRecording}
         />
-        {beginRecording && streamAvailable && (
+        {isRecording && (
           <PauseRecordingButton
             handlePauseClick={handlePauseClick}
             isPaused={isPaused}

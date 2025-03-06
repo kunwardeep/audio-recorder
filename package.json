@@ -7,14 +7,12 @@
   },
   "dependencies": {
     "@google-cloud/speech": "^6.7.1",
-    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "14.0.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.126",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
+    "@types/react": "18.3.17",
+    "@types/react-dom": "18.3.5",
     "@zendeskgarden/react-chrome": "^9.5.2",
     "@zendeskgarden/react-forms": "^9.5.2",
     "@zendeskgarden/react-grid": "^9.5.2",
@@ -29,9 +27,9 @@
     "node-polyfill-webpack-plugin": "^4.1.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
-    "react": "^19.0.0",
+    "react": "18.3.1",
     "react-app-rewired": "^2.2.1",
-    "react-dom": "^19.0.0",
+    "react-dom": "18.3.1",
     "react-router-dom": "^7.2.0",
     "react-scripts": "5.0.1",
     "stream-browserify": "^3.0.0",
@@ -60,6 +58,8 @@
   },
   "devDependencies": {
     "@arthurgeron/eslint-plugin-react-usememo": "^2.4.3",
-    "@styled/typescript-styled-plugin": "^1.0.1"
+    "@styled/typescript-styled-plugin": "^1.0.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.2.0"
   }
 }
