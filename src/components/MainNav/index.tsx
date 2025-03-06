@@ -107,6 +107,7 @@ const MainNav = React.memo(({ children }: { children: ReactNode }) => {
       <Body>
         <Header />
         <Content id="example-navigation-main-content">
+          {/* eslint-disable-next-line @arthurgeron/react-usememo/require-usememo*/}
           <Main style={{ padding: 28 }}>
             <Grid.Row>
               <Grid.Col>{children}</Grid.Col>
