@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
-import { KEY } from "../key";
+import { useCallback, useContext, useState } from "react";
+import { KeyContext } from "../App";
 
 // Ideally the request should be routed using the an internal API
 // that has the credentials to talk to the google cloud
@@ -17,8 +17,9 @@ const readFileAsBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
-const url = `https://speech.googleapis.com/v1/speech:recognize?key=${KEY}`;
 const useTranscribeAudio = (updateNotes: (val: string) => void) => {
+  const key = useContext(KeyContext);
+  const url = `https://speech.googleapis.com/v1/speech:recognize?key=${key}`;
   const [error, setError] = useState<Error>();
   const transcribeAudioHandler = useCallback(
     (blob: Blob) => {
@@ -44,21 +45,28 @@ const useTranscribeAudio = (updateNotes: (val: string) => void) => {
           });
 
           const data = await response.json();
-          console.log("data", data.results);
+          if (data.error) {
+            console.log("ERROR Fetching-", data.error.message);
+            setError(new Error(data.error.message));
+          }
 
           if (data.results && data.results[0]) {
-            console.log(data.results[0].alternatives[0].transcript);
-            console.log("transcribing");
+            console.log(
+              "Transcribed Data - ",
+              data.results[0].alternatives[0].transcript
+            );
+
             updateNotes(data.results[0].alternatives[0].transcript);
           }
         } catch (error) {
-          console.log("ERROR--------", error);
+          // When internet is down
+          console.log("ERROR-", error);
           setError(error as Error);
         }
       };
       fn();
     },
-    [updateNotes]
+    [updateNotes, url]
   );
 
   return { transcribeAudioHandler, error };

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { getCustomers } from "../server";
-import { ICustomersData } from "../types";
+import { ICustomerData } from "../types";
 
-let CACHE_CUSTOMERS: Array<ICustomersData>;
+let CACHE_CUSTOMERS: Array<ICustomerData>;
 
 const useFetchCustomers = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<Array<ICustomersData>>();
+  const [data, setData] = useState<Array<ICustomerData>>();
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
@@ -27,7 +27,6 @@ const useFetchCustomers = () => {
         });
     }
   }, []);
-
   return { loading, error, data };
 };
 

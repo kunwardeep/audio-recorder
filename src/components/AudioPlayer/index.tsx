@@ -19,8 +19,6 @@ const AudioPlayer = React.memo(
     useEffect(() => {
       if (audioRef.current && audioUrl) {
         audioRef.current.load();
-      } else {
-        console.log("audioRef.current", audioRef.current);
       }
     }, [audioUrl]);
 
