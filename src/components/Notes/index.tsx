@@ -31,8 +31,9 @@ const Notes = React.memo(({ currentNotes, voiceNotes, saveNotes }: INotes) => {
     []
   );
   const handleOnBlur = useCallback(() => {
-    saveNotes(currentNotes);
-  }, [currentNotes, saveNotes]);
+    console.log("sss", clinicNotes);
+    saveNotes(clinicNotes);
+  }, [clinicNotes, saveNotes]);
 
   return (
     <NotesBoundary>
