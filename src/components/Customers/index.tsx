@@ -6,6 +6,7 @@ import useFetchCustomers from "../../hooks/useFetchCustomers";
 import LoadingComponent from "../LoadingComponent";
 import ErrorComponent from "../ErrorComponent";
 import { Anchor } from "@zendeskgarden/react-buttons";
+import { useNavigate } from "react-router-dom";
 
 const StyledContainer = styled.div`
   overflow-x: auto;
@@ -25,6 +26,8 @@ const StyledAnchor = styled(Anchor)`
 `;
 
 const Customers = React.memo(() => {
+  const navigate = useNavigate();
+
   const { loading, error, data } = useFetchCustomers();
 
   return (
@@ -46,12 +49,20 @@ const Customers = React.memo(() => {
             <Table.Body>
               {/*eslint-disable-next-line @arthurgeron/react-usememo/require-usememo*/}
               {data.map((customer, i) => {
-                const href = `/?user=${customer.id}`;
+                const navigateTo = `/?user=${customer.id}`;
                 return (
                   <Table.Row key={customer.name + i}>
                     <StyledTableCell>{customer.id}</StyledTableCell>
                     <StyledTableCell>
-                      <StyledAnchor href={href}>{customer.name}</StyledAnchor>
+                      <StyledAnchor
+                        href={"#"}
+                        onClick={() => {
+                          console.log("yes");
+                          navigate(navigateTo);
+                        }}
+                      >
+                        {customer.name}
+                      </StyledAnchor>
                     </StyledTableCell>
                     <StyledTableCell>
                       {customer.recordings.length}

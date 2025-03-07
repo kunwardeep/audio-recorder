@@ -98,12 +98,10 @@ const TranscribeTextButton = ({
 
 const RecordingPage = React.memo(
   ({ userData }: { userData: ICustomerData }) => {
-    // We should be able to get userData from a hook
     const [currentNotes, setCurrentNotes] = useState("notes");
     const [voiceNotes, setVoiceNotes] = useState("notes");
     const { transcribeAudioHandler, error: errorTranscribing } =
       useTranscribeAudio(setVoiceNotes);
-    // const [recordingLocation, setRecordingLocation] = useState<string>("");
     const [audioBlob, setAudioBlob] = useState<Blob>();
     const { saveAudioFile } = useIndexedDBAudio(userData.id);
 
