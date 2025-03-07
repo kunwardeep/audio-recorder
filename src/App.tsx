@@ -4,16 +4,16 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import Settings from "./components/Settings";
 import Customers from "./components/Customers";
-import React, { createContext, useState } from "react";
+import React, { createContext, useCallback, useState } from "react";
 
 export const KeyContext = createContext("");
 
 const App = React.memo(() => {
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useState("empty");
 
-  const updateKey = (value: string) => {
+  const updateKey = useCallback((value: string) => {
     setApiKey(value);
-  };
+  }, []);
 
   return (
     <div>
