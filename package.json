@@ -16,6 +16,8 @@
     "@zendeskgarden/react-chrome": "^9.5.2",
     "@zendeskgarden/react-forms": "^9.5.2",
     "@zendeskgarden/react-grid": "^9.5.2",
+    "@zendeskgarden/react-notifications": "^9.5.2",
+    "@zendeskgarden/react-tables": "^9.5.2",
     "@zendeskgarden/react-tabs": "^9.5.2",
     "@zendeskgarden/react-theming": "^9.5.2",
     "@zendeskgarden/react-tooltips": "^9.5.2",

@@ -1,16 +1,13 @@
 /* eslint-disable @arthurgeron/react-usememo/require-usememo */
-
-// This hook been copied
-import { useState } from "react";
-import { useGetCurrentUser } from "./useGetCurrentUser";
+import { useCallback, useEffect, useState } from "react";
 
 const DB_NAME = "AudioDB";
 const STORE_NAME = "audioFiles";
 const DB_VERSION = 1;
 
-const openDB = (currentUser: string): Promise<IDBDatabase> => {
+const openDB = (currentUserId: number): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(`${currentUser}_${DB_NAME}`, DB_VERSION);
+    const request = indexedDB.open(`${currentUserId}_${DB_NAME}`, DB_VERSION);
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -24,23 +21,20 @@ const openDB = (currentUser: string): Promise<IDBDatabase> => {
   });
 };
 
-export const useIndexedDBAudio = () => {
-  const currentUser = useGetCurrentUser();
+export const useIndexedDBAudio = (userId: number) => {
   const [audioFiles, setAudioFiles] = useState<{ name: string; file: Blob }[]>(
     []
   );
 
-  // Save an audio file
   const saveAudioFile = async (name: string, file: Blob) => {
-    const db = await openDB(currentUser);
+    const db = await openDB(userId);
     const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     store.put(file, name);
   };
 
-  // Retrieve all audio files
-  const getAudioFiles = async () => {
-    const db = await openDB(currentUser);
+  const getAudioFiles = useCallback(async () => {
+    const db = await openDB(userId);
     const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.getAllKeys();
@@ -63,30 +57,28 @@ export const useIndexedDBAudio = () => {
 
       setAudioFiles(files);
     };
-  };
+  }, [userId]);
 
-  // Delete an audio file by name
   const deleteAudioFile = async (name: string) => {
-    const db = await openDB(currentUser);
+    const db = await openDB(userId);
     const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     store.delete(name);
     setAudioFiles((prev) => prev.filter((file) => file.name !== name));
   };
 
-  // Clear all audio files
   const clearAllAudioFiles = async () => {
-    const db = await openDB(currentUser);
+    const db = await openDB(userId);
     const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     store.clear();
     setAudioFiles([]);
   };
 
-  // // Load audio files on mount
-  // useEffect(() => {
-  //   getAudioFiles();
-  // }, [getAudioFiles]);
+  // Load audio files on mount
+  useEffect(() => {
+    getAudioFiles();
+  }, [getAudioFiles]);
 
   return {
     audioFiles,

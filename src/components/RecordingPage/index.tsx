@@ -6,6 +6,7 @@ import { useIndexedDBAudio } from "../../hooks/useIndexedDBAudio";
 import styled from "styled-components";
 import { Button } from "@zendeskgarden/react-buttons";
 import useTranscribeAudio from "../../hooks/useTranscribeAudio";
+import { ICustomerData } from "../../types";
 
 const UserDetail = styled.div`
   padding: 10px;
@@ -16,7 +17,7 @@ const UserDetail = styled.div`
 const CurrentUserRecordBoundary = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 10px;
   height: 300px;
 `;
 
@@ -26,11 +27,17 @@ const AudioBlobDisplay = styled.div`
   align-items: center;
 `;
 
+const DisplayError = styled.div`
+  width: 500px;
+`;
+
 const CurrentUserRecord = ({
+  userData,
   audioBlob,
   transcribeAudioHandler,
   errorTranscribing,
 }: {
+  userData: ICustomerData;
   audioBlob: Blob | undefined;
   transcribeAudioHandler: (blob: Blob) => void;
   errorTranscribing: Error | undefined;
@@ -42,10 +49,10 @@ const CurrentUserRecord = ({
   return (
     <CurrentUserRecordBoundary>
       <UserDetail>
-        <b>Patient ID</b> 1
+        <b>Patient ID</b> {userData.id}
       </UserDetail>
       <UserDetail>
-        <b>Patient Name</b> Robert Smith
+        <b>Patient Name</b> {userData.name}
       </UserDetail>
       <UserDetail>
         <u>
@@ -56,16 +63,17 @@ const CurrentUserRecord = ({
         {audioBlob ? (
           <AudioBlobDisplay>
             <div>{audioBlob && <AudioPlayer audioBlob={audioBlob} />}</div>
-
             <TranscribeTextButton startTranscribe={startTranscribe} />
-            {errorTranscribing && (
-              <div>Error Transcribing errorTranscribing</div>
-            )}
           </AudioBlobDisplay>
         ) : (
           "Current recording will be shown here"
         )}
       </UserDetail>
+      {errorTranscribing && (
+        <DisplayError>
+          <b>Error Transcribing</b> {errorTranscribing.message}
+        </DisplayError>
+      )}
     </CurrentUserRecordBoundary>
   );
 };
@@ -88,47 +96,51 @@ const TranscribeTextButton = ({
   return <Button onClick={handleOnClick}>Transcribe Text</Button>;
 };
 
-const RecordingPage = React.memo(() => {
-  // We should be able to get userData from a hook
-  const [currentNotes, setCurrentNotes] = useState("notes");
-  const [voiceNotes, setVoiceNotes] = useState("notes");
-  const { transcribeAudioHandler, error: errorTranscribing } =
-    useTranscribeAudio(setVoiceNotes);
-  // const [recordingLocation, setRecordingLocation] = useState<string>("");
-  const [audioBlob, setAudioBlob] = useState<Blob>();
-  const { saveAudioFile } = useIndexedDBAudio();
+const RecordingPage = React.memo(
+  ({ userData }: { userData: ICustomerData }) => {
+    // We should be able to get userData from a hook
+    const [currentNotes, setCurrentNotes] = useState("notes");
+    const [voiceNotes, setVoiceNotes] = useState("notes");
+    const { transcribeAudioHandler, error: errorTranscribing } =
+      useTranscribeAudio(setVoiceNotes);
+    // const [recordingLocation, setRecordingLocation] = useState<string>("");
+    const [audioBlob, setAudioBlob] = useState<Blob>();
+    const { saveAudioFile } = useIndexedDBAudio(userData.id);
 
-  const saveAudioBlob = useCallback(
-    (blob: Blob) => {
-      if (blob) {
-        setAudioBlob(blob);
-        saveAudioFile(Date.now().toString(), blob);
-      }
-    },
-    [saveAudioFile]
-  );
+    const saveAudioBlob = useCallback(
+      (blob: Blob) => {
+        if (blob) {
+          setAudioBlob(blob);
+          saveAudioFile(Date.now().toString(), blob);
+        }
+      },
+      [saveAudioFile]
+    );
 
-  const saveNotes = useCallback((notes: string) => {
-    console.log("Saving notes...", notes);
-  }, []);
+    const saveNotes = useCallback((notes: string) => {
+      setCurrentNotes(notes);
+      console.log("Saving notes...", notes);
+    }, []);
 
-  return (
-    <div>
-      <RecordingPageHeader>
-        <Recorder saveAudioBlob={saveAudioBlob} />
-        <CurrentUserRecord
-          audioBlob={audioBlob}
-          transcribeAudioHandler={transcribeAudioHandler}
-          errorTranscribing={errorTranscribing}
+    return (
+      <div>
+        <RecordingPageHeader>
+          <Recorder saveAudioBlob={saveAudioBlob} />
+          <CurrentUserRecord
+            userData={userData}
+            audioBlob={audioBlob}
+            transcribeAudioHandler={transcribeAudioHandler}
+            errorTranscribing={errorTranscribing}
+          />
+        </RecordingPageHeader>
+        <Notes
+          currentNotes={currentNotes}
+          voiceNotes={voiceNotes}
+          saveNotes={saveNotes}
         />
-      </RecordingPageHeader>
-      <Notes
-        currentNotes={currentNotes}
-        voiceNotes={voiceNotes}
-        saveNotes={saveNotes}
-      />
-    </div>
-  );
-});
+      </div>
+    );
+  }
+);
 
 export default RecordingPage;

@@ -15,9 +15,9 @@ import {
   Nav,
   SkipNav,
 } from "@zendeskgarden/react-chrome";
-import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import React from "react";
+import useParamNavigation from "../../hooks/useParamNavigation";
 
 const HOME_PATH = "/";
 const SETTING_PATH = "/settings";
@@ -28,7 +28,7 @@ type NavType = typeof HOME_PATH | typeof SETTING_PATH | typeof CUSTOMERS_PATH;
 const MainNav = React.memo(({ children }: { children: ReactNode }) => {
   const [nav, setNav] = useState<NavType>();
   const [expanded, setExpanded] = useState<boolean>(false);
-  const navigate = useNavigate();
+  const navigate = useParamNavigation();
   const location = useLocation();
 
   useEffect(() => {

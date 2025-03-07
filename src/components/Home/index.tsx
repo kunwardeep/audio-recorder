@@ -1,22 +1,20 @@
-import { useState } from "react";
-import useFetchCustomers from "../../hooks/useFetchCustomers";
+import React, { useState } from "react";
+import useGetCurrentUser from "../../hooks/useGetCurrentUser";
 import MainNav from "../MainNav";
-
 import { Tabs } from "@zendeskgarden/react-tabs";
-import React from "react";
-import Loading from "../Loading";
-import Error from "../Error";
+import LoadingComponent from "../LoadingComponent";
+import ErrorComponent from "../ErrorComponent";
 import RecordingPage from "../RecordingPage";
 import UnsavedRecordings from "../UnsavedRecordings";
 
 const Home = React.memo(() => {
   const [selectedTab, setSelectedTab] = useState("start-recording");
-  const { loading, error, data } = useFetchCustomers();
+  const { loading, error, data } = useGetCurrentUser();
 
   return (
     <MainNav>
-      {loading && <Loading />}
-      {error && <Error />}
+      {loading && <LoadingComponent />}
+      {error && <ErrorComponent error={error} />}
       {data && (
         <Tabs selectedItem={selectedTab} onChange={setSelectedTab}>
           <Tabs.TabList>
@@ -25,10 +23,10 @@ const Home = React.memo(() => {
             <Tabs.Tab item="saved-recordings">Previous Recordings</Tabs.Tab>
           </Tabs.TabList>
           <Tabs.TabPanel item="start-recording">
-            <RecordingPage />
+            <RecordingPage userData={data} />
           </Tabs.TabPanel>
           <Tabs.TabPanel item="unsaved-recordings">
-            <UnsavedRecordings />
+            <UnsavedRecordings userData={data} />
           </Tabs.TabPanel>
           <Tabs.TabPanel item="saved-recordings">
             Previous Recording

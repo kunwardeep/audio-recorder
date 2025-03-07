@@ -53,7 +53,7 @@ const Recorder = React.memo(
     // }, []);
     const recordingHandler = useCallback((data: Blob) => {
       audioChunksRef.current.push(data);
-      console.log("handle recording");
+      console.log("Handle the recording chunks");
     }, []);
 
     const {

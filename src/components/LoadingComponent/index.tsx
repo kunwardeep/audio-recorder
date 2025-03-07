@@ -1,6 +1,6 @@
 // eslint-disable-next-line @arthurgeron/react-usememo/require-memo
-const Loading = () => {
+const LoadingComponent = () => {
   return <div>LOADING</div>;
 };
 
-export default Loading;
+export default LoadingComponent;
