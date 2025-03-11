@@ -1,17 +1,17 @@
 import { useRef, useCallback, useState, useEffect } from "react";
 
 interface IUseRecorder {
-  recordingHandler: (data: Blob) => void;
   settings: {
     recordingTimeSlice: number;
   };
 }
 
-const useRecorder = ({ recordingHandler, settings }: IUseRecorder) => {
+const useRecorder = ({ settings }: IUseRecorder) => {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [streamAvailable, setStreamAvailable] = useState(false);
+  const [blob, setBlob] = useState<Blob>();
 
   const handleOnStop = () => {
     console.log("useRecorder - stopped");
@@ -27,17 +27,16 @@ const useRecorder = ({ recordingHandler, settings }: IUseRecorder) => {
   const handleOnError = (event: Event) =>
     console.error("useRecorder - error", event);
 
-  const handleDataAvailable = useCallback(
-    (event: BlobEvent) => {
-      if (event.data.size > 0) {
-        recordingHandler(event.data);
-      }
-    },
-    [recordingHandler]
-  );
+  const handleDataAvailable = useCallback((event: BlobEvent) => {
+    if (event.data.size > 0) {
+      setBlob(event.data);
+    }
+  }, []);
 
   const captureAudio = useCallback(async () => {
     try {
+      // const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
 
@@ -48,6 +47,7 @@ const useRecorder = ({ recordingHandler, settings }: IUseRecorder) => {
       mediaRecorder.onstart = handleOnStart;
       mediaRecorder.onresume = handleOnResume;
       mediaRecorder.onerror = handleOnError;
+
       mediaRecorder.start(settings.recordingTimeSlice);
 
       mediaRecorderRef.current = mediaRecorder;
@@ -90,6 +90,7 @@ const useRecorder = ({ recordingHandler, settings }: IUseRecorder) => {
   }, [stopRecording]);
 
   return {
+    blob,
     streamAvailable,
     error,
     startRecording,

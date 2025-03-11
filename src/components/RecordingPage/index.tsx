@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Recorder from "../Recorder";
 import Notes from "../Notes";
 import AudioPlayer from "../AudioPlayer";
@@ -34,14 +34,22 @@ const DisplayError = styled.div`
 const CurrentUserRecord = ({
   userData,
   audioBlob,
-  transcribeAudioHandler,
-  errorTranscribing,
+  saveVoiceNotes,
 }: {
   userData: ICustomerData;
   audioBlob: Blob | undefined;
-  transcribeAudioHandler: (blob: Blob) => void;
-  errorTranscribing: Error | undefined;
+  saveVoiceNotes: (val: string) => void;
 }) => {
+  const {
+    transcribeAudioHandler,
+    error: errorTranscribing,
+    data: transcribedData,
+  } = useTranscribeAudio();
+
+  useEffect(() => {
+    transcribedData && saveVoiceNotes(transcribedData);
+  }, [saveVoiceNotes, transcribedData]);
+
   const startTranscribe = useCallback(() => {
     audioBlob && transcribeAudioHandler(audioBlob);
   }, [audioBlob, transcribeAudioHandler]);
@@ -100,8 +108,7 @@ const RecordingPage = React.memo(
   ({ userData }: { userData: ICustomerData }) => {
     const [currentNotes, setCurrentNotes] = useState("notes");
     const [voiceNotes, setVoiceNotes] = useState("notes");
-    const { transcribeAudioHandler, error: errorTranscribing } =
-      useTranscribeAudio(setVoiceNotes);
+
     const [audioBlob, setAudioBlob] = useState<Blob>();
     const { saveAudioFile } = useIndexedDBAudio(userData.id);
 
@@ -120,15 +127,22 @@ const RecordingPage = React.memo(
       console.log("Saving notes...", notes);
     }, []);
 
+    const saveVoiceNotes = useCallback((notes: string) => {
+      setVoiceNotes(notes);
+      console.log("Saving voice notes...", notes);
+    }, []);
+
     return (
       <div>
         <RecordingPageHeader>
-          <Recorder saveAudioBlob={saveAudioBlob} />
+          <Recorder
+            saveAudioBlob={saveAudioBlob}
+            saveVoiceNotes={saveVoiceNotes}
+          />
           <CurrentUserRecord
             userData={userData}
             audioBlob={audioBlob}
-            transcribeAudioHandler={transcribeAudioHandler}
-            errorTranscribing={errorTranscribing}
+            saveVoiceNotes={saveVoiceNotes}
           />
         </RecordingPageHeader>
         <Notes
