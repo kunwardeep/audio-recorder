@@ -153,7 +153,7 @@ const Recorder = React.memo(
       <RecorderBoundary>
         <RecordingTime
           //fix this timer
-          pauseTimer={isPaused ?? true}
+          pauseTimer={isPaused ?? false}
           startTimer={beginRecording && streamAvailable}
         />
         <CurrentStateLabel data-testid={RECORDING_STATE_LABEL_TESTID}>

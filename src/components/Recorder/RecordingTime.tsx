@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 
@@ -9,8 +9,6 @@ const RecordingTimeDisplay = styled.span`
   border-radius: 50px;
 `;
 
-// TODO: Pause time not implemented
-// Also this should be a dumb component that just displays the time. Move this logic outside
 const RecordingTime = React.memo(
   ({
     startTimer,
@@ -20,20 +18,46 @@ const RecordingTime = React.memo(
     pauseTimer: boolean;
   }) => {
     const [elapsedTime, setElapsedTime] = useState(0);
+    const timer = useRef<any>();
+    const lastTime = useRef<any>();
 
     useEffect(() => {
-      if (startTimer) {
+      const shouldStartTimer = startTimer && !pauseTimer;
+      const shouldStopTimer = !startTimer;
+      const shouldPauseTimer = startTimer && pauseTimer;
+
+      if (shouldPauseTimer) {
+        clearInterval(timer.current);
+      }
+
+      if (shouldStopTimer) {
+        console.log("stop timer");
+        clearInterval(timer.current);
+        timer.current = undefined;
+        lastTime.current = undefined;
+        return;
+      }
+
+      if (shouldStartTimer) {
+        let pausedTime = 0;
+        if (lastTime.current) {
+          pausedTime = lastTime.current * 1000;
+        }
+
         const startTime = Date.now();
 
-        const timer = setInterval(() => {
+        timer.current = setInterval(() => {
           const currentTime = Date.now();
-          const timeDiff = Math.floor((currentTime - startTime) / 1000);
+          const timeDiff = Math.floor(
+            (currentTime - startTime + pausedTime) / 1000
+          );
+          lastTime.current = timeDiff;
           setElapsedTime(timeDiff);
         }, 500);
 
-        return () => clearInterval(timer);
+        return;
       }
-    }, [startTimer]);
+    }, [startTimer, pauseTimer]);
 
     const formatTime = (seconds: number) => {
       const hrs = Math.floor(seconds / 3600);
