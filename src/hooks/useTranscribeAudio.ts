@@ -1,5 +1,6 @@
 import { useCallback, useContext, useState } from "react";
 import { KeyContext } from "../App";
+import { KEY } from "../key";
 
 // Ideally the request should be routed using the an internal API
 // that has the credentials to talk to the google cloud
@@ -17,9 +18,12 @@ const readFileAsBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
-const useTranscribeAudio = (updateNotes: (val: string) => void) => {
+const useTranscribeAudio = () => {
   const key = useContext(KeyContext);
-  const url = `https://speech.googleapis.com/v1/speech:recognize?key=${key}`;
+  const url = `https://speech.googleapis.com/v1/speech:recognize?key=${
+    KEY ?? key
+  }`;
+  const [data, setData] = useState();
   const [error, setError] = useState<Error>();
   const transcribeAudioHandler = useCallback(
     (blob: Blob) => {
@@ -56,7 +60,7 @@ const useTranscribeAudio = (updateNotes: (val: string) => void) => {
               data.results[0].alternatives[0].transcript
             );
 
-            updateNotes(data.results[0].alternatives[0].transcript);
+            setData(data.results[0].alternatives[0].transcript);
           }
         } catch (error) {
           // When internet is down
@@ -66,10 +70,10 @@ const useTranscribeAudio = (updateNotes: (val: string) => void) => {
       };
       fn();
     },
-    [updateNotes, url]
+    [url]
   );
 
-  return { transcribeAudioHandler, error };
+  return { transcribeAudioHandler, data, error };
 };
 
 export default useTranscribeAudio;
