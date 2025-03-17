@@ -6,6 +6,7 @@ import PauseRecordingButton from "./PauseRecordingButton";
 import useRecorder from "../../hooks/useRecorder";
 import React from "react";
 import { RECORDING_STATE_LABEL_TESTID } from "./dataTestIds";
+import useSpeechWebSocket from "../../hooks/useSpeechWebSocket";
 
 const RecorderBoundary = styled.div`
   display: flex;
@@ -40,7 +41,13 @@ const PAUSE_BUTTON = "PAUSE_BUTTON_CLICKED";
 const RECORD_BUTTON = "RECORD_BUTTON_CLICKED";
 
 const Recorder = React.memo(
-  ({ saveAudioBlob }: { saveAudioBlob: (blob: Blob) => void }) => {
+  ({
+    saveAudioBlob,
+    saveVoiceNotes,
+  }: {
+    saveAudioBlob: (blob: Blob) => void;
+    saveVoiceNotes: (val: string) => void;
+  }) => {
     const [beginRecording, setBeginRecording] = useState(false);
     const [isRecording, setIsRecording] = useState<boolean | undefined>(
       undefined
@@ -48,15 +55,16 @@ const Recorder = React.memo(
     const [isPaused, setIsPaused] = useState<boolean | undefined>(undefined);
     const [label, setLabel] = useState(LABELS.DEFAULT);
     const audioChunksRef = useRef<Array<Blob>>([]);
-    // const transcribeAudioChunks = useCallback((data: Blob) => {
-    //   console.log("Lets Transcribe");
-    // }, []);
-    const recordingHandler = useCallback((data: Blob) => {
-      audioChunksRef.current.push(data);
-      console.log("Handle the recording chunks");
-    }, []);
 
     const {
+      startWebSocket,
+      sendBlob: sendBlobWs,
+      closeWebSocket,
+      transcript,
+    } = useSpeechWebSocket("ws://localhost:8080");
+
+    const {
+      blob,
       error,
       streamAvailable,
       startRecording,
@@ -65,9 +73,20 @@ const Recorder = React.memo(
       resumeRecording,
       // eslint-disable-next-line @arthurgeron/react-usememo/require-usememo
     } = useRecorder({
-      recordingHandler: recordingHandler,
-      settings: { recordingTimeSlice: 5000 },
+      settings: { recordingTimeSlice: 200 },
     });
+
+    useEffect(() => {
+      saveVoiceNotes(transcript);
+    }, [saveVoiceNotes, transcript]);
+
+    useEffect(() => {
+      if (blob) {
+        audioChunksRef.current.push(blob);
+        console.log("Handle the recording chunks,and send blob");
+        sendBlobWs(blob);
+      }
+    }, [blob, sendBlobWs]);
 
     useEffect(() => {
       error && setLabel(LABELS.ERROR);
@@ -75,11 +94,12 @@ const Recorder = React.memo(
 
     useEffect(() => {
       if (beginRecording && streamAvailable) {
+        startWebSocket();
         setIsRecording(true);
       } else {
         setIsRecording(false);
       }
-    }, [beginRecording, streamAvailable]);
+    }, [beginRecording, startWebSocket, streamAvailable]);
 
     useEffect(() => {
       if (!streamAvailable && audioChunksRef.current.length > 0) {
@@ -88,8 +108,10 @@ const Recorder = React.memo(
         });
         saveAudioBlob(audioBlob);
         audioChunksRef.current = [];
+
+        closeWebSocket();
       }
-    }, [saveAudioBlob, streamAvailable]);
+    }, [closeWebSocket, saveAudioBlob, sendBlobWs, streamAvailable]);
 
     const updateLabel = useCallback(
       (buttonClicked: typeof PAUSE_BUTTON | typeof RECORD_BUTTON) => {
@@ -131,7 +153,7 @@ const Recorder = React.memo(
       <RecorderBoundary>
         <RecordingTime
           //fix this timer
-          pauseTimer={isPaused ?? true}
+          pauseTimer={isPaused ?? false}
           startTimer={beginRecording && streamAvailable}
         />
         <CurrentStateLabel data-testid={RECORDING_STATE_LABEL_TESTID}>

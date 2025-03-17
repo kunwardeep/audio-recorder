@@ -30,6 +30,7 @@ jest.mock("../../hooks/useRecorder", () => ({
 }));
 
 const mockSaveAudioBlob = jest.fn();
+const mockSaveVoiceNotes = jest.fn();
 
 describe("Recorder Component", () => {
   const user = userEvent.setup();
@@ -39,14 +40,24 @@ describe("Recorder Component", () => {
   });
 
   it("should show 'Recording not started' by default", () => {
-    customRender(<Recorder saveAudioBlob={mockSaveAudioBlob} />);
+    customRender(
+      <Recorder
+        saveAudioBlob={mockSaveAudioBlob}
+        saveVoiceNotes={mockSaveVoiceNotes}
+      />
+    );
     expect(screen.getByTestId(RECORDING_STATE_LABEL_TESTID)).toHaveTextContent(
       "Recording not started"
     );
   });
 
   it("should show 'Recording started' when recording begins", async () => {
-    customRender(<Recorder saveAudioBlob={mockSaveAudioBlob} />);
+    customRender(
+      <Recorder
+        saveAudioBlob={mockSaveAudioBlob}
+        saveVoiceNotes={mockSaveVoiceNotes}
+      />
+    );
     const recordButton = screen.getByTestId(START_RECORDING_BUTTON_TESTID);
 
     await user.click(recordButton); // Use userEvent for better simulation
@@ -59,7 +70,12 @@ describe("Recorder Component", () => {
   });
 
   it("should show 'Recording stopped' when recording stops", async () => {
-    customRender(<Recorder saveAudioBlob={mockSaveAudioBlob} />);
+    customRender(
+      <Recorder
+        saveAudioBlob={mockSaveAudioBlob}
+        saveVoiceNotes={mockSaveVoiceNotes}
+      />
+    );
     const recordButton = screen.getByTestId(START_RECORDING_BUTTON_TESTID);
     await user.click(recordButton);
     await user.click(recordButton);
@@ -73,7 +89,12 @@ describe("Recorder Component", () => {
   });
 
   it("should show 'Recording paused' when paused", async () => {
-    customRender(<Recorder saveAudioBlob={mockSaveAudioBlob} />);
+    customRender(
+      <Recorder
+        saveAudioBlob={mockSaveAudioBlob}
+        saveVoiceNotes={mockSaveVoiceNotes}
+      />
+    );
     const recordButton = screen.getByTestId(START_RECORDING_BUTTON_TESTID);
     await user.click(recordButton);
     expect(startRecordingFn).toBeCalledTimes(1);
@@ -86,7 +107,12 @@ describe("Recorder Component", () => {
   });
 
   it("should show 'Recording resumed' when resumed", async () => {
-    customRender(<Recorder saveAudioBlob={mockSaveAudioBlob} />);
+    customRender(
+      <Recorder
+        saveAudioBlob={mockSaveAudioBlob}
+        saveVoiceNotes={mockSaveVoiceNotes}
+      />
+    );
     const recordButton = screen.getByTestId(START_RECORDING_BUTTON_TESTID);
     await user.click(recordButton);
     const pauseButton = screen.getByTestId(PAUSE_RECORDING_BUTTON_TESTID);
