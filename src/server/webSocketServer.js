@@ -27,7 +27,7 @@ wss.on("connection", (ws) => {
       const transcript = data.results[0]?.alternatives[0]?.transcript;
       const isFinal = data.results[0]?.isFinal;
       console.log("isFinal---", isFinal);
-
+      console.log("transcript", JSON.stringify({ transcript }));
       if (transcript) {
         ws.send(JSON.stringify({ transcript }));
       }

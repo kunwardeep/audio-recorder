@@ -128,6 +128,7 @@ const RecordingPage = React.memo(
     }, []);
 
     const saveVoiceNotes = useCallback((notes: string) => {
+      console.log("Notes", notes);
       setVoiceNotes(notes);
       console.log("Saving voice notes...", notes);
     }, []);
