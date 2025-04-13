@@ -4,7 +4,6 @@ import { ReactComponent as HomeIcon } from "@zendeskgarden/svg-icons/src/26/home
 import { ReactComponent as CustomersIcon } from "@zendeskgarden/svg-icons/src/26/tray-user-group.svg";
 import { ReactComponent as SettingsIcon } from "@zendeskgarden/svg-icons/src/26/settings-fill.svg";
 import { ReactComponent as CompanyLogo } from "../../assets/icons/company_logo.svg";
-import { ReactComponent as HeidiLogo } from "../../assets/icons/heidi-logo-1.svg";
 import { PALETTE } from "@zendeskgarden/react-theming";
 import {
   Body,
@@ -96,13 +95,6 @@ const MainNav = React.memo(({ children }: { children: ReactNode }) => {
             <Nav.ItemText>Settings</Nav.ItemText>
           </Nav.Item>
         </Nav.List>
-
-        <Nav.Item hasBrandmark title="Zendesk">
-          <Nav.ItemIcon>
-            <HeidiLogo />
-          </Nav.ItemIcon>
-          <Nav.ItemText>Zendesk</Nav.ItemText>
-        </Nav.Item>
       </Nav>
       <Body>
         <Header />
